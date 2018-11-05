@@ -1,0 +1,74 @@
+object frameFile: TframeFile
+  Align = Top
+  Size.Width = 264.000000000000000000
+  Size.Height = 90.000000000000000000
+  Size.PlatformDefault = False
+  object Rectangle3: TRectangle
+    Align = Client
+    Fill.Color = claNull
+    Padding.Left = 1.000000000000000000
+    Padding.Top = 1.000000000000000000
+    Padding.Right = 1.000000000000000000
+    Padding.Bottom = 1.000000000000000000
+    Size.Width = 264.000000000000000000
+    Size.Height = 90.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Color = claWhite
+    object SpeedButton1: TSpeedButton
+      Align = MostLeft
+      Position.X = 1.000000000000000000
+      Position.Y = 1.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 88.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'playtoolbutton'
+    end
+    object cbPause: TCheckBox
+      Align = Right
+      Position.X = 192.000000000000000000
+      Position.Y = 17.000000000000000000
+      Size.Width = 71.000000000000000000
+      Size.Height = 56.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      Text = 'Pause'
+    end
+    object Rectangle1: TRectangle
+      Align = Client
+      Fill.Color = claWhite
+      Size.Width = 143.000000000000000000
+      Size.Height = 56.000000000000000000
+      Size.PlatformDefault = False
+      OnResize = Rectangle1Resize
+      object Rectangle2: TRectangle
+        Align = Left
+        Fill.Color = claFirebrick
+        Size.Width = 50.000000000000000000
+        Size.Height = 56.000000000000000000
+        Size.PlatformDefault = False
+      end
+    end
+    object Label2: TLabel
+      Align = Bottom
+      AutoSize = True
+      Position.X = 49.000000000000000000
+      Position.Y = 73.000000000000000000
+      Size.Width = 214.000000000000000000
+      Size.Height = 16.000000000000000000
+      Size.PlatformDefault = False
+      Text = '-'
+      TabOrder = 4
+    end
+    object Label1: TLabel
+      Align = Top
+      AutoSize = True
+      Position.X = 49.000000000000000000
+      Position.Y = 1.000000000000000000
+      Size.Width = 214.000000000000000000
+      Size.Height = 16.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Label1'
+      TabOrder = 5
+    end
+  end
+end

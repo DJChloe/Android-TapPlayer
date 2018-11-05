@@ -1,0 +1,48 @@
+object FormProgressDialog: TFormProgressDialog
+  Left = 0
+  Top = 0
+  BorderStyle = Single
+  Caption = 'Form1'
+  ClientHeight = 30
+  ClientWidth = 240
+  Position = MainFormCenter
+  StyleBook = TabbedForm.StyleBook1
+  FormStyle = Popup
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 3
+  object Rectangle1: TRectangle
+    Align = Client
+    Fill.Color = claNull
+    Padding.Left = 1.000000000000000000
+    Padding.Top = 1.000000000000000000
+    Padding.Right = 1.000000000000000000
+    Padding.Bottom = 1.000000000000000000
+    Size.Width = 240.000000000000000000
+    Size.Height = 30.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Color = claWhite
+    object Label1: TLabel
+      Align = Top
+      Position.X = 1.000000000000000000
+      Position.Y = 1.000000000000000000
+      Size.Width = 238.000000000000000000
+      Size.Height = 23.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Conversion en cours...'
+      TabOrder = 0
+    end
+    object ProgressBar1: TProgressBar
+      Align = Top
+      Orientation = Horizontal
+      Position.X = 1.000000000000000000
+      Position.Y = 24.000000000000000000
+      Size.Width = 238.000000000000000000
+      Size.Height = 6.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'progressbarstyle'
+      Value = 5.000000000000000000
+    end
+  end
+end

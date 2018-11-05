@@ -1,0 +1,206 @@
+object FormOpenFile: TFormOpenFile
+  Left = 0
+  Top = 0
+  Caption = 'Ouvrir Fichier'
+  ClientHeight = 378
+  ClientWidth = 288
+  Position = MainFormCenter
+  StyleBook = TabbedForm.StyleBook1
+  FormStyle = Popup
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnShow = FormShow
+  DesignerMasterStyle = 3
+  object Rectangle1: TRectangle
+    Align = Client
+    Fill.Color = claNull
+    Padding.Left = 1.000000000000000000
+    Padding.Top = 1.000000000000000000
+    Padding.Right = 1.000000000000000000
+    Padding.Bottom = 1.000000000000000000
+    Size.Width = 288.000000000000000000
+    Size.Height = 378.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Color = claWhite
+    object HeaderToolBar: TToolBar
+      Anchors = []
+      Position.X = 1.000000000000000000
+      Position.Y = 1.000000000000000000
+      Size.Width = 286.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object ToolBarLabel: TLabel
+        Align = Contents
+        StyledSettings = [Family, Size, Style]
+        Size.Width = 286.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        StyleLookup = 'toollabel'
+        TextSettings.FontColor = claWhite
+        TextSettings.HorzAlign = Center
+        Text = 'Choisir un Fichier'
+        TabOrder = 0
+      end
+    end
+    object LabelPath: TLabel
+      Align = Top
+      Position.X = 1.000000000000000000
+      Position.Y = 49.000000000000000000
+      Size.Width = 286.000000000000000000
+      Size.Height = 23.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'LabelPath'
+      TabOrder = 1
+    end
+    object ListBox1: TListBox
+      Align = Client
+      Size.Width = 286.000000000000000000
+      Size.Height = 217.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      DisableFocusEffect = True
+      Images = ImageList1
+      DefaultItemStyles.ItemStyle = ''
+      DefaultItemStyles.GroupHeaderStyle = ''
+      DefaultItemStyles.GroupFooterStyle = ''
+      OnItemClick = ListBox1ItemClick
+      Viewport.Width = 286.000000000000000000
+      Viewport.Height = 217.000000000000000000
+      object ListBoxItem1: TListBoxItem
+        TabOrder = 0
+        Text = 'ListBoxItem1'
+      end
+    end
+    object Panel1: TPanel
+      Align = Bottom
+      Position.X = 1.000000000000000000
+      Position.Y = 289.000000000000000000
+      Size.Width = 286.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object LabelSelText: TLabel
+        Align = Left
+        Size.Width = 89.000000000000000000
+        Size.Height = 40.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Selection :'
+        TabOrder = 1
+      end
+      object LabelSelection: TLabel
+        Align = Client
+        StyledSettings = [Family, Size, FontColor]
+        Size.Width = 197.000000000000000000
+        Size.Height = 40.000000000000000000
+        Size.PlatformDefault = False
+        Text = '-'
+        TabOrder = 0
+      end
+    end
+    object ToolBar1: TToolBar
+      Align = MostBottom
+      Position.X = 1.000000000000000000
+      Position.Y = 329.000000000000000000
+      Size.Width = 286.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      object SpeedButton1: TSpeedButton
+        Align = Right
+        ModalResult = 1
+        Position.X = 238.000000000000000000
+        Size.Width = 48.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        StyleLookup = 'donetoolbutton'
+        OnClick = SpeedButton1Click
+      end
+      object SpeedButton2: TSpeedButton
+        Align = Left
+        Size.Width = 48.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        StyleLookup = 'deletetoolbutton'
+        OnClick = SpeedButton2Click
+      end
+    end
+  end
+  object ImageList1: TImageList
+    Source = <
+      item
+        MultiResBitmap.LoadSize = 0
+        MultiResBitmap = <
+          item
+            Width = 16
+            Height = 16
+            PNG = {
+              89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF
+              61000000017352474200AECE1CE90000000467414D410000B18F0BFC61050000
+              011A49444154384FC5515B6EC230101CC32F5FA84814BE7A047EB940EFC1C18A
+              B807520F52A81028A650A94825A4D02636B3B1CD439008BE3AD2C6DE5DCFAC3D
+              C1BF43452FB0A872671815462665A0DD8372BB72A86800DB6AF8CC437FF22342
+              22EC058BF62AEA53E0C125F742C7F50281DA13D0EC509EAFC8C2D8135479852C
+              819E4E28F0FA6C5B8FB5EB070546CC212A3448889679F2C1FA0A7A91D236235E
+              912C07AF851003D9EC80F5184857A298D7C5F76204A2AC5B92846C7F7DD3A158
+              E0303505E209B0D32C5AD73BC1A5801003395D73EA1B4512DFBCC4B9C0E1CAF4
+              259E019B298BF4A104478140CE7E3875C4F5DB37CAE105BC519B3927BFF3A97F
+              AE7C03DC7F30743621D17C39A15B426E4BA868D8B5D82EF3E47E007BFC1A6C5B
+              45FE3D370000000049454E44AE426082}
+            FileName = 
+              'C:\Users\chloe\Documents\Embarcadero\Studio\Projets\TapPlayer\gl' +
+              'yphs\folder (16).png'
+          end>
+        Name = 'folder (16)'
+      end
+      item
+        MultiResBitmap.LoadSize = 0
+        MultiResBitmap = <
+          item
+            Width = 16
+            Height = 16
+            PNG = {
+              89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF
+              61000000017352474200AECE1CE90000000467414D410000B18F0BFC61050000
+              01EE49444154384FD552BF6B1441187D33B337BB7BBB67C811138E805184809D
+              8D45100B9B2498A095859DE42C0DA260631141B108768A6063937FC1422B4521
+              B914DA0712C989B05C622E77A749E0F67677FC6676B8786865E75B1E33DFEC37
+              EFFB35F8FFC1AE2CDC568C31A4F6E0770862EBFB6E6EFC05420838FAF2ABE547
+              88E3D81E1F433BD41B3BD61A849412F71E3C044F29B4E79F40D06730C0A23748
+              CFD225EAACD96CF58E7AB3F0098AAC9E02B63B638052F0DC8289D46AB421B840
+              9264942EC799A13D08E65079292EAF4CC23195EEAF8291F3D3D56944720AF528
+              C2CFF63E89B8B871BD8ACDCD2D7C58ABE1ECF8294C24EFF178AA66C4814970BB
+              33586F9EC3B3A5BB7498A2FBA385D64E844B17CEA3E4E98819569E3FC1C7BDD3
+              D63BC780C074E533E66FDD47960904E5518C8C4FE0F5DB77D86D1F42F7EAE2B5
+              9BB85AD9B0DE39F21E2C36690AD459AAE62891C894D64DCD149AD18119271954
+              7B86A2D3434C623404CCBCF0E0E8D46A6A09B1228544F795A01B42104CE01B6F
+              9836F5615D642AE9F825D85C7551F9A521A4598691E16184BE0FAA21F7E21CDB
+              5FEBFD42397D5D4AF5E890B2A27F5D5A3901054A4FD27AB25C461886F083C050
+              EFA5EB411672BA9E8F525842C1DED192FDA75CA4C895D1310A6EA313B4F81793
+              C171AFF5EEA0D341D2FBF3E5FE03805F15FF9B138A9262A10000000049454E44
+              AE426082}
+            FileName = 
+              'C:\Users\chloe\Documents\Embarcadero\Studio\Projets\TapPlayer\gl' +
+              'yphs\audio_cassette (16).png'
+          end>
+        Name = 'audio_cassette (16)'
+      end>
+    Destination = <
+      item
+        Layers = <
+          item
+            Name = 'folder (16)'
+          end>
+      end
+      item
+        Layers = <
+          item
+            Name = 'audio_cassette (16)'
+          end>
+      end>
+    Left = 177
+    Top = 176
+  end
+end
