@@ -164,11 +164,11 @@ begin
   i:=Low(AnArrayOfSampleRatesToTest);
   while ((result.SampleRate<0) and (i<=High(AnArrayOfSampleRatesToTest))) do
   begin
-    bufsize := TJAudioRecord.JavaClass.getMinBufferSize(AnArrayOfSampleRatesToTest[i],
+    bufsize := TJAudioTrack.JavaClass.getMinBufferSize(AnArrayOfSampleRatesToTest[i],
             TJAudioFormat.JavaClass.CHANNEL_OUT_MONO,
             TJAudioFormat.JavaClass.ENCODING_PCM_8BIT);
-    if ((bufsize <> TJAudioRecord.JavaClass.ERROR)
-       and (bufsize <> TJAudioRecord.JavaClass.ERROR_BAD_VALUE)
+    if ((bufsize <> TJAudioTrack.JavaClass.ERROR)
+       and (bufsize <> TJAudioTrack.JavaClass.ERROR_BAD_VALUE)
        and (bufsize > 0))
     then begin
            result.SampleRate:= AnArrayOfSampleRatesToTest[i];
