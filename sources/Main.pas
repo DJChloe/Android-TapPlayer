@@ -96,6 +96,7 @@ type
 var
   MainForm: TMainForm;
 
+
 implementation
 
 {$R *.fmx}
@@ -690,7 +691,7 @@ var AFileFrame:TComponent;
     LastMode:TPlayState;
     i:integer;
 begin
-  AFileFrame:=(sender as TPanel).Parent;
+  AFileFrame:=(sender as TframeFile).Parent;
   LastMode:=FPlayState;
   PStop;
 
