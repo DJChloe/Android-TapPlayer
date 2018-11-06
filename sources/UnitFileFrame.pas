@@ -25,7 +25,6 @@ type
     FMax: single;
     FMin: single;
     FValue: single;
-    FFileStream: TMemoryStream;
     FFileNameOnDisk: string;
     FFileIndex: integer;
     function GetDoPause: boolean;
@@ -41,7 +40,6 @@ type
     procedure UpdateWidths;
     procedure SetFileIndex(const Value: integer);
     procedure SetFileNameOnDisk(const Value: string);
-    procedure SetFileStream(const Value: TMemoryStream);
     { Déclarations privées }
   public
     { Déclarations publiques }
@@ -56,7 +54,6 @@ type
     property ProgressValue:single read FValue write SetValue;
     property FileNameOnDisk:string read FFileNameOnDisk write SetFileNameOnDisk;
     property FileIndex:integer read FFileIndex write SetFileIndex;
-    property FileStream:TMemoryStream read FFileStream write SetFileStream;
   end;
 
 implementation
@@ -71,13 +68,11 @@ begin
   fMin:=0;
   FMax:=100;
   FValue:=0;
-  FFileStream:=TMemoryStream.Create;
 end;
 
 destructor TframeFile.Destroy;
 begin
   inherited;
-  FFileStream.Free;
 end;
 
 function TframeFile.GetDoPause: boolean;
@@ -129,11 +124,6 @@ end;
 procedure TframeFile.SetFileNameOnDisk(const Value: string);
 begin
   FFileNameOnDisk := Value;
-end;
-
-procedure TframeFile.SetFileStream(const Value: TMemoryStream);
-begin
-  FFileStream := Value;
 end;
 
 procedure TframeFile.SetMax(const Value: single);

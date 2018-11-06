@@ -24,6 +24,7 @@ TOricFile=class
     FAutoFlag: byte;
     FWavLength: int64;
     FRawData: boolean;
+    FPCMStream: Tmemorystream;
     procedure SetAddrDeb(const Value: word);
     procedure SetAddrFin(const Value: word);
     procedure SetName(const Value: string);
@@ -68,6 +69,7 @@ TOricFile=class
     property AddrFinDesc:string read GetAddrFinDesc;
     property WavLength:int64 read FWavLength write SetWavLength;
     property RawData:boolean read FRawData write SetRawData;
+    property PCMStream:Tmemorystream read FPCMStream write FPCMStream;
 end;
 implementation
 uses SysUtils;
@@ -103,12 +105,14 @@ begin
   RawData:=False;
   FHeader:=TMemoryStream.Create;
   FData:=TMemoryStream.Create;
+  FPCMStream:=TMemoryStream.Create;
 end;
 
 destructor TOricFile.Destroy;
 begin
   FHeader.Free;
   FData.Free;
+  FPCMStream.Free;
 end;
 
 function TOricFile.GetAddrDebDesc: string;
@@ -290,6 +294,7 @@ begin
     AddToName(Value);
   end;
 end;
+
 
 procedure TOricFile.SetRawData(const Value: boolean);
 begin

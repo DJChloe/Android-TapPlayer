@@ -5,7 +5,7 @@ object FormOpenFile: TFormOpenFile
   ClientHeight = 378
   ClientWidth = 288
   Position = MainFormCenter
-  StyleBook = TabbedForm.StyleBook1
+  StyleBook = MainForm.StyleBook1
   FormStyle = Popup
   FormFactor.Width = 320
   FormFactor.Height = 480

@@ -7,11 +7,11 @@ uses
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.TabControl,
   FMX.StdCtrls, FMX.Gestures, FMX.Controls.Presentation, FMX.Layouts,
   FMX.ListBox, System.ImageList, FMX.ImgList, FMX.Edit, FMX.SearchBox,
-  FMX.Objects,UnitFileFrame,unitTapFiles, unittapfileslist,unitwavs,
-  FMX.ComboEdit, FMX.EditBox, FMX.SpinBox,UnitAudio;
+  FMX.Objects,UnitFileFrame,unitTapFiles, unittapfileslist,
+  FMX.ComboEdit, FMX.EditBox, FMX.SpinBox,UnitAudio,FMX.Platform, FMX.PhoneDialer;
 
 type
-  TTabbedForm = class(TForm)
+  TMainForm = class(TForm)
     HeaderToolBar: TToolBar;
     ToolBarLabel: TLabel;
     StyleBook1: TStyleBook;
@@ -39,13 +39,14 @@ type
   private
     fsout:TMemoryStream;
     file_size:integer;
-    sample_riff:THEAD;
     ccurrent_level:byte;
     FCurrentFile: string;
     FCurrentindex: integer;
     FPaused: boolean;
     FPlayState:TPlayState;
     FPCMPlayer:TPCM_Player;
+    PhoneDialerService: IFMXPhoneDialerService;
+    procedure MyOnCallStateChanged(const ACallID: String; const ACallState: TCallState);
     procedure SetCurrentFile(const Value: string);
     procedure SetCurrentIndex(const Value: integer);
     procedure SetPaused(const Value: boolean);
@@ -93,26 +94,35 @@ type
   end;
 
 var
-  TabbedForm: TTabbedForm;
+  MainForm: TMainForm;
 
 implementation
 
 {$R *.fmx}
-uses unitOpenDiag,System.IOUtils,UnitProgressDialog;
+uses unitOpenDiag,System.IOUtils,UnitProgressDialog,UnitPermissions;
 
 var Speed:integer;//8000;
 
-procedure TTabbedForm.FormCreate(Sender: TObject);
+procedure TMainForm.FormCreate(Sender: TObject);
 var
 ac1:TAudioCap;
 const
    validSampleRates:array[0..5] of integer=(4800, 8000, 11025, 16000, 44100, 48000);
 begin
   { This defines the default active tab at runtime }
+ //LPermissions := TJavaObjectArray<JString>.Create(1);
+//  LPermissions.Items[0] := StringToJString('android.permission.READ_PHONE_STATE');
+
+//  TAndroidHelper.Activity.requestPermissions(LPermissions, 0);
    CurrentFile:='';
   //AppPath:=IncludeTrailingBackslash(ExtractFilePath(application.ExeName));
   OricTape:=TOricTape.Create;
   OricTape.OwnsObjects:=true;
+
+  TPlatformServices.Current.SupportsPlatformService(IFMXPhoneDialerService, IInterface(PhoneDialerService));
+  if Assigned(PhoneDialerService) then
+    PhoneDialerService.OnCallStateChanged := MyOnCallStateChanged;
+
   ac1:=getMinSupportedSampleRate(validSampleRates);
   //Speed:=ac1.SampleRate;
   speed:=44100;
@@ -121,7 +131,7 @@ begin
   FPCMPlayer.OnTimeChange:=DoUpdateUI;
 end;
 
-procedure TTabbedForm.FormDestroy(Sender: TObject);
+procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   FPCMPlayer.Free;
   FreeFileFrames;
@@ -129,7 +139,7 @@ begin
   OricTape.Free;
 end;
 
-procedure TTabbedForm.lbiFileSelectClick(Sender: TObject);
+procedure TMainForm.lbiFileSelectClick(Sender: TObject);
 begin
   FormOpenFile.Show;
   ///if FormOpenFile.ModalResult=mrOk then
@@ -137,27 +147,27 @@ begin
   //OpenDialog1.Execute;
 end;
 
-procedure TTabbedForm.sbNextClick(Sender: TObject);
+procedure TMainForm.sbNextClick(Sender: TObject);
 begin
   TapNext;
 end;
 
-procedure TTabbedForm.sbPauseClick(Sender: TObject);
+procedure TMainForm.sbPauseClick(Sender: TObject);
 begin
   TapPause;
 end;
 
-procedure TTabbedForm.sbPlayClick(Sender: TObject);
+procedure TMainForm.sbPlayClick(Sender: TObject);
 begin
   TapPlay;
 end;
 
-procedure TTabbedForm.sbPreviousClick(Sender: TObject);
+procedure TMainForm.sbPreviousClick(Sender: TObject);
 begin
   TapPrevious;
 end;
 
-procedure TTabbedForm.SetCurrentFile(const Value: string);
+procedure TMainForm.SetCurrentFile(const Value: string);
 begin
   if fCurrentFile=value then Exit;
   FCurrentFile := Value;
@@ -168,28 +178,28 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TTabbedForm.OpenFile(FileName: string);
+procedure TMainForm.OpenFile(FileName: string);
 begin
     CurrentFile:=FileName;
     EncodeAndGetReady;
 end;
 
-procedure TTabbedForm.PPause;
+procedure TMainForm.PPause;
 begin
   FPCMPlayer.Pause;
 end;
 
-procedure TTabbedForm.PPlay;
+procedure TMainForm.PPlay;
 begin
   FPCMPlayer.Play;
 end;
 
-procedure TTabbedForm.PStop;
+procedure TMainForm.PStop;
 begin
   FPCMPlayer.Stop;
 end;
 
-procedure TTabbedForm.SetCurrentindex(const Value: integer);
+procedure TMainForm.SetCurrentindex(const Value: integer);
 begin
   if FCurrentindex<>value then
   begin
@@ -203,17 +213,17 @@ begin
          then FileFrames[FCurrentindex].Actif:=true;
 end;
 
-function TTabbedForm.ComputeDuration(OTF: TOricFile): integer;
+function TMainForm.ComputeDuration(OTF: TOricFile): integer;
 begin
   result:=(OTF.WavLength*1000) div Speed;
 end;
 
-function TTabbedForm.ComputeTotalTime: integer;
+function TMainForm.ComputeTotalTime: integer;
 begin
   Result:=(OricTape.TotalWavLength*1000) div Speed;
 end;
 
-function TTabbedForm.ComputePlayedTime(UpToIndex: Integer; Supplement: Int64):integer;
+function TMainForm.ComputePlayedTime(UpToIndex: Integer; Supplement: Int64):integer;
 var i:integer;
 begin
   result:=0;
@@ -225,7 +235,7 @@ begin
   Result:=Result+Supplement;
 end;
 
-procedure TTabbedForm.emit_bit(bit:boolean);
+procedure TMainForm.emit_bit(bit:boolean);
 begin
   //44100Hz
   case speed of
@@ -282,7 +292,7 @@ begin
   end;
 end;
 
-procedure TTabbedForm.emit_byte(val: byte);
+procedure TMainForm.emit_byte(val: byte);
 var i:byte;
     parity:byte;
 begin
@@ -301,14 +311,14 @@ begin
   emit_bit(true);  // 4 bits stop au lieu de 3.5 pour être sûr que les routines aient du temps
 end;
 
-procedure TTabbedForm.emit_gap;
+procedure TMainForm.emit_gap;
 var i:integer;
 begin
  //un paquet de bits stop pour laisser le temps d'afficher la ligne de statut
   for i:=0 to 99 do emit_bit(true);
 end;
 
-procedure TTabbedForm.emit_level(size: integer);
+procedure TMainForm.emit_level(size: integer);
 var i:integer;
 begin
    ccurrent_level:=256-ccurrent_level;
@@ -317,7 +327,7 @@ begin
 end;
 
 
-procedure TTabbedForm.emit_silence(size: integer);
+procedure TMainForm.emit_silence(size: integer);
 var i:integer;
     b:byte;
 begin
@@ -326,7 +336,7 @@ begin
    inc(file_size,size);
 end;
 
-procedure TTabbedForm.EncodeAndGetReady;
+procedure TMainForm.EncodeAndGetReady;
 begin
   ToolBar1.Enabled:=false;
   if FPCMPlayer.PlayState=TPlayState.psPlaying
@@ -348,7 +358,7 @@ begin
   Application.ProcessMessages;
 end;
 
-function TTabbedForm.init:boolean;
+function TMainForm.init:boolean;
 begin
   if not FileExists(CurrentFile)
   then begin
@@ -358,7 +368,7 @@ begin
   Result:=true;
 end;
 
-procedure TTabbedForm.InitTimeInfos;
+procedure TMainForm.InitTimeInfos;
 var
   L,tsec:integer;
   Min,Sec: Word;
@@ -373,7 +383,7 @@ begin
   lbiFileSelect.ItemData.Detail:=Format('00:00 of %.2d:%.2d', [Min,Sec]);
 end;
 
-procedure TTabbedForm.InitTimeInfo(fileindex:integer);
+procedure TMainForm.InitTimeInfo(fileindex:integer);
 var
   L,tsec:integer;
   Min,Sec: Word;
@@ -393,7 +403,7 @@ begin
     UpdatePlayedTime(fileindex,0);
 end;
 
-procedure TTabbedForm.Maxtimeinfo(fileindex:integer);
+procedure TMainForm.Maxtimeinfo(fileindex:integer);
 var
   L,tsec:integer;
   Min,Sec: Word;
@@ -412,12 +422,12 @@ begin
     UpdatePlayedTime(fileindex+1,0);
 end;
 
-procedure TTabbedForm.SetPaused(const Value: boolean);
+procedure TMainForm.SetPaused(const Value: boolean);
 begin
   FPaused := Value;
 end;
 
-procedure TTabbedForm.PlayStateChanged(APlayState: TPlayState);
+procedure TMainForm.PlayStateChanged(APlayState: TPlayState);
 begin
   if not PNotify then exit;
 
@@ -430,13 +440,18 @@ begin
          then UpdateTimeInfo;
          paused:=FileFrames[Currentindex].DoPause;
          Currentindex:=Currentindex+1;
-         FPCMPlayer.LoadStream(FileFrames[FCurrentindex].FileStream);
+         FPCMPlayer.LoadStream(OricTape[FCurrentindex].PCMStream);
          //TempFiles.Strings[currentindex]);
          if paused then TapStopBetween else TapPlay;
   end else TapStop;
 end;
 
-procedure TTabbedForm.TapNext;
+procedure TMainForm.StateChanged(AState: TPlayState);
+begin
+  //
+end;
+
+procedure TMainForm.TapNext;
 var LastMode:TPlayState;
 begin
   LastMode:=FPlayState;
@@ -455,7 +470,7 @@ begin
   sbStop.Enabled:=false;
   if Currentindex<OricTape.Count then
   begin
-    FPCMPlayer.LoadStream(FileFrames[Currentindex].FileStream);
+    FPCMPlayer.LoadStream(OricTape[Currentindex].PCMStream);
     FileFrames[Currentindex].MaxValue := FPCMPlayer.Duration;
     if (LastMode=TPlayState.psPlaying)
     then begin
@@ -470,7 +485,7 @@ begin
   end;
 end;
 
-procedure TTabbedForm.TapPause;
+procedure TMainForm.TapPause;
 var IsPaused:boolean;
 begin
   IsPaused:=(FPlayState=TPlayState.psStopped);
@@ -488,7 +503,7 @@ begin
   end;
 end;
 
-procedure TTabbedForm.TapPlay;
+procedure TMainForm.TapPlay;
 begin
   paused:=false;
   lbiFileSelect.Enabled:=false;
@@ -503,7 +518,7 @@ begin
   PNotify:=true;
 end;
 
-procedure TTabbedForm.TapPrevious;
+procedure TMainForm.TapPrevious;
 var LastMode:TPlayState;
 begin
   LastMode:=FPlayState;
@@ -520,7 +535,7 @@ begin
   sbPrevious.Enabled:=(Currentindex>0);
   sbNext.Enabled:=true;
   sbStop.Enabled:=false;
-  FPCMPlayer.LoadStream(FileFrames[Currentindex].FileStream);
+  FPCMPlayer.LoadStream(OricTape[Currentindex].PCMStream);
   FileFrames[Currentindex].MaxValue := FPCMPlayer.Duration;
 
   if LastMode=TPlayState.psPlaying then begin
@@ -534,7 +549,7 @@ begin
                              end;
 end;
 
-procedure TTabbedForm.TapStart;
+procedure TMainForm.TapStart;
 var s:string;
 begin
   Currentindex:=0;
@@ -546,10 +561,10 @@ begin
   sbNext.Enabled:=true;
   sbStop.Enabled:=false;
 
-  FPCMPlayer.LoadStream(FileFrames[Currentindex].FileStream);
+  FPCMPlayer.LoadStream(OricTape[Currentindex].PCMStream);
 end;
 
-procedure TTabbedForm.TapStop;
+procedure TMainForm.TapStop;
 begin
   PStop;
   UpdateTimeInfo;
@@ -557,7 +572,7 @@ begin
   TapStart;
 end;
 
-procedure TTabbedForm.TapStopBetween;
+procedure TMainForm.TapStopBetween;
 begin
   UpdateTimeInfo;
   PStop;
@@ -569,7 +584,7 @@ begin
   sbStop.Enabled:=true;
 end;
 
-procedure TTabbedForm.FreeFileFrames;
+procedure TMainForm.FreeFileFrames;
 var i:integer;
 begin
   for i:=0 to High(FileFrames) do
@@ -582,7 +597,7 @@ begin
   SetLength(FileFrames,0);
 end;
 
-procedure TTabbedForm.UpdateFileFrames;
+procedure TMainForm.UpdateFileFrames;
 var i:integer;
 begin
   FreeFileFrames;
@@ -629,7 +644,7 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TTabbedForm.UpdatePlayedTime(UpToIndex: integer; Supplement: int64);
+procedure TMainForm.UpdatePlayedTime(UpToIndex: integer; Supplement: int64);
 var
   L,tsec:integer;
   Min,Sec: Word;
@@ -646,7 +661,7 @@ begin
       lbiFileSelect.Itemdata.detail:=Format('%.2d:%.2d of %.2d:%.2d', [Min, Sec,Min2,Sec2]);
 end;
 
-procedure TTabbedForm.UpdateTimeInfo;
+procedure TMainForm.UpdateTimeInfo;
 var
   L,tsec:integer;
   Min,Sec: Word;
@@ -670,50 +685,8 @@ begin
   UpdatePlayedTime(Currentindex,trunc(FPCMPlayer.Time));
 end;
 
-
-procedure CreateWav(channels : word; resolution : word; rate : longint; fn : string);
-type
-  TWavHeader = record
- rId : longint;
- rLen : longint;
- wId : longint;
- fId : longint;
- fLen : longint;
- wFormatTag : word;
- nChannels : word;
- nSamplesPerSec : longint;
- nAvgBytesPerSec : longint;
- nBlockAlign : word;
- wBitsPerSample : word;
- dId : longint;
- wSampleLength : longint;
- end;
- var
- wf : file of TWavHeader;
- wh : TWavHeader;
- begin
- wh.rId := $46464952;
- wh.rLen := 36;
- wh.wId := $45564157;
- wh.fId := $20746d66;
- wh.fLen := 16;
- wh.wFormatTag := 1;
- wh.nChannels := channels;
- wh.nSamplesPerSec := rate;
- wh.nAvgBytesPerSec := channels*rate*(resolution div 8);
- wh.nBlockAlign := channels*(resolution div 8);
- wh.wBitsPerSample := resolution;
- wh.dId := $61746164;
- wh.wSampleLength := 0;
-
- assignfile(wf,fn);
- rewrite(wf);
- write(wf,wh);
- closefile(wf);
- end;
-
 //Opérations sur fichiers cassette
-procedure TTabbedForm.FileFrameClick(Sender: TObject);
+procedure TMainForm.FileFrameClick(Sender: TObject);
 var AFileFrame:TComponent;
     LastMode:TPlayState;
     i:integer;
@@ -735,7 +708,7 @@ begin
   sbPrevious.Enabled:=(Currentindex>0);
   sbNext.Enabled:=true;
   sbStop.Enabled:=false;
-  FPCMPlayer.LoadStream(FileFrames[Currentindex].FileStream);
+  FPCMPlayer.LoadStream(OricTape[Currentindex].PCMStream);
   FileFrames[Currentindex].ProgressValue := FPCMPlayer.Duration;
 
   if LastMode=TPlayState.psPlaying then begin
@@ -749,10 +722,11 @@ begin
                              end;
 end;
 
-function TTabbedForm.Convertir:boolean;
+function TMainForm.Convertir:boolean;
 var i,ii:integer;
     b:byte;
     readsize:int64;
+    Astream:TMemoryStream;
 begin
   OricTape.LoadfromFile(CurrentFile,lmDistinctRawData);
   if OricTape.ContainsRawData then
@@ -802,9 +776,8 @@ begin
       //fsout.Seek(0,soFromBeginning);
       //fsout.Write(sample_riff.asbytes,44);
       OricTape.Items[ii].wavLength:=fsout.Size;
-
-      FileFrames[index].FileStream.Clear;
-      FileFrames[index].FileStream.CopyFrom(fsout,0);
+      OricTape[ii].PCMStream.Size:=0;
+      OricTape[ii].PCMStream.CopyFrom(fsout,0);
     finally
       fsout.Free;
     end;
@@ -815,9 +788,22 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TTabbedForm.DoUpdateUI(newPos: Single);
+procedure TMainForm.DoUpdateUI(newPos: Single);
 begin
   UpdateTimeInfo;
+end;
+
+procedure TMainForm.MyOnCallStateChanged(const ACallID: String; const ACallState: TCallState);
+var outText: String;
+begin
+  case ACallState of
+         TCallState.Connected,TCallState.None,TCallState.Disconnected:
+         begin
+           // on revient à l'application, on ne fait rien..
+           //on passe hors-ligne, le téléphone ne sonnera pas, rien ne se passe.
+         end;
+         TCallState.Incoming,TCallState.Dialing:FPCMPlayer.Stop;
+     end;
 end;
 
 end.

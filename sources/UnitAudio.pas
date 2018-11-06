@@ -13,8 +13,7 @@ AndroidApi.JNI, Androidapi.JNI.Media,
 Androidapi.JNI.GraphicsContentViewText,
 Androidapi.JNI.Net,
 Androidapi.JNIBridge,
-Androidapi.JNI.JavaTypes,
-Androidapi.JNI.Telephony;
+Androidapi.JNI.JavaTypes;
 
 type
 {Thread Audio }
@@ -33,7 +32,7 @@ TAudioCap=record
 end;
 TPCM_Player=class;
 
-TPlaybackPositionUpdateListener = class(TJavaLocal, JAudioTrack_OnPlaybackPositionUpdateListener)
+TPlaybackPositionUpdateListener = class(TJavaLocal, JAudioTrack_OnPlaybackPositionUpdateListener)//class(TJavaGenericImport<JAudioTrack_OnPlaybackPositionUpdateListenerClass, JAudioTrack_OnPlaybackPositionUpdateListener>) //
   private
     //Objet pour lequel il faut transmettre  la notification
     FOwner : TPCM_Player;
@@ -46,14 +45,6 @@ TPlaybackPositionUpdateListener = class(TJavaLocal, JAudioTrack_OnPlaybackPositi
     procedure OnPeriodicNotification(track: JAudioTrack); cdecl;
 end;
 
-TPhoneStateListener=class(TJavaLocal, JPhoneStateListener)
-    private
-    FOwner : TPCM_Player;
-  public
-    constructor Create(AOwner : TPCM_Player);
-    procedure OnCallStateChanged(state: Integer; incomingNumber: JString); cdecl;
-end;
-
 TPCM_Player=class
   private
      FSampleRate: Integer;
@@ -62,7 +53,6 @@ TPCM_Player=class
      FTime:single;
      FDuration:single;
      FComplete:boolean;
-     TelephonyManager:JTelephonyManager;
      AudioTrack: JAudioTrack;
      AudioStream: TJavaArray<Byte>;
      AudioDataSize: Integer;
@@ -73,7 +63,6 @@ TPCM_Player=class
      FOnDurationChange:TDurationChangedEvent;
      FOnComplete:TCompleteEvent;
      PlaybackPositionUpdateListener:TPlaybackPositionUpdateListener;
-     PhoneStateListener:TPhoneStateListener;
      function GetPlayState:TPlayState;
      function GetState:TState;
      procedure SetPlayState(const APlayState: TPlayState);
@@ -86,13 +75,11 @@ TPCM_Player=class
     procedure Release;
     procedure DoMarkerReached;
     procedure DoPeriodicNotification;
-    procedure DoOnCallStateChanged(state: Integer);
     procedure Updates;
   public
     constructor Create(SampleRate: integer);
     destructor Destroy; override;
     procedure LoadStream(AStream:TMemoryStream);
-    procedure FirstPlay;
     procedure Play;
     procedure Pause;
     procedure PlayPause;
@@ -111,7 +98,61 @@ end;
 
 function getMinSupportedSampleRate(const AnArrayOfSampleRatesToTest: array of Integer):TAudioCap;
 
-
+const
+  TJAudioTrackPLAYSTATE_STOPPED = 1;
+  TJAudioTrackPLAYSTATE_PAUSED = 2;
+  TJAudioTrackPLAYSTATE_PLAYING = 3;
+  TJAudioTrackMODE_STATIC = 0;
+  TJAudioTrackMODE_STREAM = 1;
+  TJAudioTrackSTATE_UNINITIALIZED = 0;
+  TJAudioTrackSTATE_INITIALIZED = 1;
+  TJAudioTrackSTATE_NO_STATIC_DATA = 2;
+  TJAudioTrackSUCCESS = 0;
+  TJAudioTrackERROR = -1;
+  TJAudioTrackERROR_BAD_VALUE = -2;
+  TJAudioTrackERROR_INVALID_OPERATION = -3;
+  TJAudioFormatENCODING_INVALID = 0;
+  TJAudioFormatENCODING_DEFAULT = 1;
+  TJAudioFormatENCODING_PCM_16BIT = 2;
+  TJAudioFormatENCODING_PCM_8BIT = 3;
+  TJAudioFormatCHANNEL_CONFIGURATION_INVALID = 0;
+  TJAudioFormatCHANNEL_CONFIGURATION_DEFAULT = 1;
+  TJAudioFormatCHANNEL_CONFIGURATION_MONO = 2;
+  TJAudioFormatCHANNEL_CONFIGURATION_STEREO = 3;
+  TJAudioFormatCHANNEL_INVALID = 0;
+  TJAudioFormatCHANNEL_OUT_DEFAULT = 1;
+  TJAudioFormatCHANNEL_OUT_FRONT_LEFT = 4;
+  TJAudioFormatCHANNEL_OUT_FRONT_RIGHT = 8;
+  TJAudioFormatCHANNEL_OUT_FRONT_CENTER = 16;
+  TJAudioFormatCHANNEL_OUT_LOW_FREQUENCY = 32;
+  TJAudioFormatCHANNEL_OUT_BACK_LEFT = 64;
+  TJAudioFormatCHANNEL_OUT_BACK_RIGHT = 128;
+  TJAudioFormatCHANNEL_OUT_FRONT_LEFT_OF_CENTER = 256;
+  TJAudioFormatCHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 512;
+  TJAudioFormatCHANNEL_OUT_BACK_CENTER = 1024;
+  TJAudioFormatCHANNEL_OUT_MONO = 4;
+  TJAudioFormatCHANNEL_OUT_STEREO = 12;
+  TJAudioFormatCHANNEL_OUT_QUAD = 204;
+  TJAudioFormatCHANNEL_OUT_SURROUND = 1052;
+  TJAudioFormatCHANNEL_OUT_5POINT1 = 252;
+  TJAudioFormatCHANNEL_OUT_7POINT1 = 1020;
+  TJAudioFormatCHANNEL_IN_DEFAULT = 1;
+  TJAudioFormatCHANNEL_IN_LEFT = 4;
+  TJAudioFormatCHANNEL_IN_RIGHT = 8;
+  TJAudioFormatCHANNEL_IN_FRONT = 16;
+  TJAudioFormatCHANNEL_IN_BACK = 32;
+  TJAudioFormatCHANNEL_IN_LEFT_PROCESSED = 64;
+  TJAudioFormatCHANNEL_IN_RIGHT_PROCESSED = 128;
+  TJAudioFormatCHANNEL_IN_FRONT_PROCESSED = 256;
+  TJAudioFormatCHANNEL_IN_BACK_PROCESSED = 512;
+  TJAudioFormatCHANNEL_IN_PRESSURE = 1024;
+  TJAudioFormatCHANNEL_IN_X_AXIS = 2048;
+  TJAudioFormatCHANNEL_IN_Y_AXIS = 4096;
+  TJAudioFormatCHANNEL_IN_Z_AXIS = 8192;
+  TJAudioFormatCHANNEL_IN_VOICE_UPLINK = 16384;
+  TJAudioFormatCHANNEL_IN_VOICE_DNLINK = 32768;
+  TJAudioFormatCHANNEL_IN_MONO = 16;
+  TJAudioFormatCHANNEL_IN_STEREO = 12;
 implementation
 
 function getMinSupportedSampleRate(const AnArrayOfSampleRatesToTest: array of Integer):TAudioCap;
@@ -124,7 +165,7 @@ begin
   while ((result.SampleRate<0) and (i<=High(AnArrayOfSampleRatesToTest))) do
   begin
     bufsize := TJAudioRecord.JavaClass.getMinBufferSize(AnArrayOfSampleRatesToTest[i],
-            TJAudioFormat.JavaClass.CHANNEL_IN_MONO,
+            TJAudioFormat.JavaClass.CHANNEL_OUT_MONO,
             TJAudioFormat.JavaClass.ENCODING_PCM_8BIT);
     if ((bufsize <> TJAudioRecord.JavaClass.ERROR)
        and (bufsize <> TJAudioRecord.JavaClass.ERROR_BAD_VALUE)
@@ -140,6 +181,7 @@ end;
 constructor TPCM_Player.Create(SampleRate: integer);
 var
   TelephonyManagerObj: JObject;
+  LPermissions: TJavaObjectArray<JString>;
 begin
   inherited Create;
   FSampleRate:=SampleRate;
@@ -149,16 +191,6 @@ begin
   FDuration:=0;
   AudioDataSize:=0;
   FComplete:=false;
-  TelephonyManagerObj:= TAndroidHelper.Context.getSystemService(
-    TJContext.JavaClass.TELEPHONY_SERVICE);
-  if TelephonyManagerObj <> nil then
-    TelephonyManager := TJTelephonyManager.Wrap(TelephonyManagerObj);
-
-
-  PlaybackPositionUpdateListener:=TPlaybackPositionUpdateListener.Create(self);
-  PhoneStateListener:=TPhoneStateListener.Create(self);
-  if TelephonyManager <> nil then
-      TelephonyManager.listen(PhoneStateListener, TJPhoneStateListener.JavaClass.LISTEN_CALL_STATE);
   updates;
 end;
 
@@ -189,7 +221,7 @@ begin
               TJAudioTrack.JavaClass.MODE_STATIC);
   if ((not Assigned(AudioTrack)) or (AudioDataSize=0)) then exit;
   try
-    AudioTrack.setVolume(0);
+    //AudioTrack.setVolume(1);
     AudioTrack.setPlaybackPositionUpdateListener(PlaybackPositionUpdateListener);
     updates;
   except
@@ -202,15 +234,15 @@ procedure TPCM_Player.Play;
 begin
   if ((not Assigned(AudioTrack)) or (AudioDataSize=0)) then exit;
   try
-    if (AudioTrack.getPlayState=TJAudioTrack.JavaClass.PLAYSTATE_PLAYING)
+    if (AudioTrack.getPlayState=TJAudioTrackPLAYSTATE_PLAYING)
     then Exit;
-    if AudioTrack.getPlayState=TJAudioTrack.JavaClass.PLAYSTATE_STOPPED
+    if AudioTrack.getPlayState=TJAudioTrackPLAYSTATE_STOPPED
     then begin
             AudioPausePosition:=0;
             AudioTrack.reloadStaticData();
             AudioTrack.write(AudioStream, 0, AudioDataSize);
             AudioTrack.setNotificationMarkerPosition(AudioDataSize);
-            AudioTrack.setPositionNotificationPeriod(FSampleRate/2); //notification toutes les 500ms
+            AudioTrack.setPositionNotificationPeriod(FSampleRate div 2); //notification toutes les 500ms
     end;
     AudioTrack.setPlaybackHeadPosition(AudioPausePosition);
     AudioTrack.play;
@@ -225,9 +257,9 @@ procedure TPCM_Player.Pause;
 begin
   if (not Assigned(AudioTrack)) then exit;
   try
-    if (AudioTrack.getPlayState=TJAudioTrack.JavaClass.PLAYSTATE_PAUSED)
+    if (AudioTrack.getPlayState=TJAudioTrackPLAYSTATE_PAUSED)
     then Exit;
-    if AudioTrack.getPlayState=TJAudioTrack.JavaClass.PLAYSTATE_PLAYING
+    if AudioTrack.getPlayState=TJAudioTrackPLAYSTATE_PLAYING
     then begin
       AudioTrack.setPlaybackHeadPosition(AudioPausePosition);
       AudioTrack.play;
@@ -244,23 +276,23 @@ begin
   if ((not Assigned(AudioTrack)) or (AudioDataSize=0)) then exit;
   try
     case AudioTrack.getPlayState of
-      TJAudioTrack.JavaClass.PLAYSTATE_PLAYING:
+      TJAudioTrackPLAYSTATE_PLAYING:
       begin
         AudioPausePosition:=AudioTrack.getPlaybackHeadPosition;
         AudioTrack.pause;
       end;
-      TJAudioTrack.JavaClass.PLAYSTATE_PAUSED:
+      TJAudioTrackPLAYSTATE_PAUSED:
       begin
         AudioTrack.setPlaybackHeadPosition(AudioPausePosition);
         AudioTrack.play;
       end;
-      TJAudioTrack.JavaClass.PLAYSTATE_STOPPED:
+      TJAudioTrackPLAYSTATE_STOPPED:
       begin
         AudioPausePosition:=0;
         AudioTrack.reloadStaticData();
         AudioTrack.write(AudioStream, 0, AudioDataSize);
         AudioTrack.setNotificationMarkerPosition(AudioDataSize);
-        AudioTrack.setPositionNotificationPeriod(FSampleRate/2); //notification toutes les 500ms
+        AudioTrack.setPositionNotificationPeriod(FSampleRate div 2); //notification toutes les 500ms
         AudioTrack.play;
       end;
     end;
@@ -285,9 +317,9 @@ begin
   Result:=TPlayState.psNil;
   if Assigned(AudioTrack) then
   case AudioTrack.getPlayState of
-    TJAudioTrack.JavaClass.PLAYSTATE_STOPPED:Result:=TPlayState.psStopped;
-    TJAudioTrack.JavaClass.PLAYSTATE_PAUSED:Result:=TPlayState.psPaused;
-    TJAudioTrack.JavaClass.PLAYSTATE_PLAYING:Result:=TPlayState.psPlaying;
+    TJAudioTrackPLAYSTATE_STOPPED:Result:=TPlayState.psStopped;
+    TJAudioTrackPLAYSTATE_PAUSED:Result:=TPlayState.psPaused;
+    TJAudioTrackPLAYSTATE_PLAYING:Result:=TPlayState.psPlaying;
   end;
 end;
 
@@ -296,9 +328,9 @@ begin
   Result:=TState.sNil;
   if Assigned(AudioTrack) then
   case AudioTrack.getState of
-    TJAudioTrack.JavaClass.STATE_UNINITIALIZED:Result:=TState.sUnitialized;
-    TJAudioTrack.JavaClass.STATE_INITIALIZED:Result:=TState.sInitialized;
-    TJAudioTrack.JavaClass.STATE_NO_STATIC_DATA:Result:=TState.sNoStaticData;
+    TJAudioTrackSTATE_UNINITIALIZED:Result:=TState.sUnitialized;
+    TJAudioTrackSTATE_INITIALIZED:Result:=TState.sInitialized;
+    TJAudioTrackSTATE_NO_STATIC_DATA:Result:=TState.sNoStaticData;
   end;
 end;
 
@@ -376,21 +408,6 @@ begin
   updates;
 end;
 
-procedure TPCM_Player.DoOnCallStateChanged(state: Integer);
-begin
-   case state of
-      TJTelephonyManager.Javaclass.CALL_STATE_IDLE:
-        begin
-          //on revient à l'application, on ne fait rien..
-        end;
-      TJTelephonyManager.Javaclass.CALL_STATE_RINGING:stop;
-      TJTelephonyManager.Javaclass.CALL_STATE_OFFHOOK:
-      begin
-        //on passe hors-ligne, le téléphone ne sonnera pas, rien ne se passe.
-      end;
-   end;
-end;
-
 constructor TPlaybackPositionUpdateListener.Create(AOwner : TPCM_Player);
 begin
   FOwner := AOwner;
@@ -406,12 +423,4 @@ begin
   FOwner.DoPeriodicNotification;
 end;
 
-constructor TPhoneStateListener.Create(AOwner : TPCM_Player);
-begin
-  FOwner := AOwner;
-end;
-
-procedure TPhoneStateListener.OnCallStateChanged(state: Integer; incomingNumber: JString);
-begin
-  FOwner.DoOnCallStateChanged(state);
-end;
+end.

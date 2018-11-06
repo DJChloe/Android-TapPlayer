@@ -81,7 +81,7 @@ begin
   Hide;
   Application.ProcessMessages;
   if FileExists(FormOpenFile.SelectedFile) then
-  TabbedForm.OpenFile(FormOpenFile.SelectedFile);
+  MainForm.OpenFile(FormOpenFile.SelectedFile);
 end;
 
 procedure TFormOpenFile.SpeedButton2Click(Sender: TObject);
