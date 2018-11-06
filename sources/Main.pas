@@ -35,7 +35,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FileFrameClick(Sender: TObject);
     procedure PlayStateChanged(APlayState: TPlayState);
-    procedure StateChanged(AState: TPlayState);
+    procedure StateChanged(AState: TState);
   private
     fsout:TMemoryStream;
     file_size:integer;
@@ -44,6 +44,7 @@ type
     FCurrentindex: integer;
     FPaused: boolean;
     FPlayState:TPlayState;
+    FState:TState;
     FPCMPlayer:TPCM_Player;
     PhoneDialerService: IFMXPhoneDialerService;
     procedure MyOnCallStateChanged(const ACallID: String; const ACallState: TCallState);
@@ -128,6 +129,7 @@ begin
   Speed:=ac1.SampleRate;
   FPCMPlayer:=TPCM_Player.Create(speed);
   FPCMPlayer.OnPlayStateChange:=PlayStateChanged;
+  FPCMPlayer.OnStateChange:=StateChanged;
   FPCMPlayer.OnTimeChange:=DoUpdateUI;
 end;
 
@@ -446,9 +448,9 @@ begin
   end else TapStop;
 end;
 
-procedure TMainForm.StateChanged(AState: TPlayState);
+procedure TMainForm.StateChanged(AState: TState);
 begin
-  //
+  FState:=AState;
 end;
 
 procedure TMainForm.TapNext;
@@ -689,14 +691,16 @@ end;
 procedure TMainForm.FileFrameClick(Sender: TObject);
 var AFileFrame:TComponent;
     LastMode:TPlayState;
+    LastState:TState;
     i:integer;
 begin
-  AFileFrame:=(sender as TframeFile).Parent;
+  AFileFrame:=(sender as TSpeedButton).Parent;
   LastMode:=FPlayState;
-  PStop;
+  LastState:=FState;
+  if LastState=TState.sInitialized then PStop;
 
   InitTimeInfo(Currentindex);
-  if LastMode<>TPlayState.psStopped then
+  if LastMode=TPlayState.psStopped then
   begin
     Currentindex:=AFileFrame.Tag;
     for I := 0 to Currentindex-1 do MaxTimeInfo(i);
@@ -791,6 +795,7 @@ end;
 procedure TMainForm.DoUpdateUI(newPos: Single);
 begin
   UpdateTimeInfo;
+  Application.ProcessMessages;
 end;
 
 procedure TMainForm.MyOnCallStateChanged(const ACallID: String; const ACallState: TCallState);
