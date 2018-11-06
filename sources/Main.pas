@@ -124,8 +124,7 @@ begin
     PhoneDialerService.OnCallStateChanged := MyOnCallStateChanged;
 
   ac1:=getMinSupportedSampleRate(validSampleRates);
-  //Speed:=ac1.SampleRate;
-  speed:=44100;
+  Speed:=ac1.SampleRate;
   FPCMPlayer:=TPCM_Player.Create(speed);
   FPCMPlayer.OnPlayStateChange:=PlayStateChanged;
   FPCMPlayer.OnTimeChange:=DoUpdateUI;
