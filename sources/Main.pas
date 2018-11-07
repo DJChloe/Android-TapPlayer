@@ -341,6 +341,7 @@ end;
 procedure TMainForm.EncodeAndGetReady;
 begin
   ToolBar1.Enabled:=false;
+
   if FPCMPlayer.PlayState=TPlayState.psPlaying
   then TapStop
   else PStop;

@@ -196,6 +196,11 @@ end;
 
 destructor TPCM_Player.Destroy;
 begin
+  if Assigned(AudioTrack) then
+  begin
+    audioTrack.flush;
+    audioTrack.release;
+  end;
   inherited;
 end;
 
@@ -214,6 +219,7 @@ begin
   AudioStream := TJavaArray<Byte>.Create(AudioDataSize);
   AStream.Position := 0;
   AStream.Read(AudioStream.Data^, AudioDataSize);
+
   if (not Assigned(AudioStream)) then exit;
   AudioTrack := TJAudioTrack.JavaClass.init(TJAudioManager.JavaClass.STREAM_MUSIC,
               FSampleRate, TJAudioFormat.JavaClass.CHANNEL_OUT_MONO,
@@ -223,6 +229,7 @@ begin
   try
     //AudioTrack.setVolume(1);
     AudioTrack.setPlaybackPositionUpdateListener(PlaybackPositionUpdateListener);
+    AudioTrack.write(AudioStream, 0, AudioDataSize);
     updates;
   except
    // TODO: handle exception
@@ -239,8 +246,7 @@ begin
     if AudioTrack.getPlayState=TJAudioTrackPLAYSTATE_STOPPED
     then begin
             AudioPausePosition:=0;
-            AudioTrack.reloadStaticData();
-            AudioTrack.write(AudioStream, 0, AudioDataSize);
+            AudioTrack.reloadStaticData;
             AudioTrack.setNotificationMarkerPosition(AudioDataSize);
             AudioTrack.setPositionNotificationPeriod(FSampleRate div 2); //notification toutes les 500ms
     end;
@@ -308,6 +314,7 @@ procedure TPCM_Player.Stop;
 begin
   if not Assigned(AudioTrack) then exit;
   AudioTrack.pause;
+  AudioTrack.flush;
   AudioTrack.stop;
   updates;
 end;
